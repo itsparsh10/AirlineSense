@@ -1,0 +1,53 @@
+stages:
+  prepare:
+    cmd: .venv/bin/python scripts/prepare_data.py
+    deps:
+      - scripts/prepare_data.py
+      - src/data/loader.py
+      - src/data/validation.py
+      - data/raw/airline_passenger_satisfaction.csv
+    params:
+      - data
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - data/processed/validation_report.json
+
+  features:
+    cmd: .venv/bin/python scripts/build_features.py
+    deps:
+      - scripts/build_features.py
+      - src/features/feature_engineering.py
+      - data/processed/train.csv
+    outs:
+      - data/processed/engineered_train.csv
+      - reports/feature_summary.json
+
+  train:
+    cmd: .venv/bin/python scripts/train.py
+    deps:
+      - scripts/train.py
+      - src/models/pipeline.py
+      - src/features/feature_engineering.py
+      - data/processed/train.csv
+      - data/processed/engineered_train.csv
+    params:
+      - training
+      - mlflow
+    metrics:
+      - reports/experiment_results.json:
+          cache: false
+
+  evaluate:
+    cmd: .venv/bin/python scripts/evaluate.py
+    deps:
+      - scripts/evaluate.py
+      - models/airlinesense_pipeline.joblib
+      - data/processed/test.csv
+    metrics:
+      - reports/test_metrics.json:
+          cache: false
+    plots:
+      - reports/satisfaction_by_segment.csv:
+          cache: false
+

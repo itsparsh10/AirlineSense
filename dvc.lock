@@ -1,0 +1,131 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: .venv/bin/python scripts/prepare_data.py
+    deps:
+    - path: data/raw/airline_passenger_satisfaction.csv
+      hash: md5
+      md5: 0b5aebedfe1df3aae9cc34f0891e14d9
+      size: 12875197
+    - path: scripts/prepare_data.py
+      hash: md5
+      md5: f34f22c65ef2fa5b495e5af1607de7e3
+      size: 1461
+    - path: src/data/loader.py
+      hash: md5
+      md5: cfa894c93dae51332b56cfe1c0f10254
+      size: 292
+    - path: src/data/validation.py
+      hash: md5
+      md5: 0bf61d0802483f8d952d1be289fbaec0
+      size: 2780
+    params:
+      params.yaml:
+        data:
+          raw_path: data/raw/airline_passenger_satisfaction.csv
+          target: Satisfaction
+          test_size: 0.2
+          random_state: 42
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 1c3e5597bde0d02f9988477d259f5c93
+      size: 2600855
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4579f7466b3ebd76661dbd67d46a0105
+      size: 10403808
+    - path: data/processed/validation_report.json
+      hash: md5
+      md5: 90ca3ea8ea10c3a0a9d80bdcb70d59e2
+      size: 448
+  features:
+    cmd: .venv/bin/python scripts/build_features.py
+    deps:
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4579f7466b3ebd76661dbd67d46a0105
+      size: 10403808
+    - path: scripts/build_features.py
+      hash: md5
+      md5: 0057299e142945ead9cd57eff2ff96be
+      size: 1228
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: bda456ea25e540a0958aa1e8fc4e6108
+      size: 1550
+    outs:
+    - path: data/processed/engineered_train.csv
+      hash: md5
+      md5: 06d79e1c855539a32ce22ee39570f75d
+      size: 14501754
+    - path: reports/feature_summary.json
+      hash: md5
+      md5: 06b7f0baa98ab30fdf1b3ebd6de1de7e
+      size: 221
+  train:
+    cmd: .venv/bin/python scripts/train.py
+    deps:
+    - path: data/processed/engineered_train.csv
+      hash: md5
+      md5: 06d79e1c855539a32ce22ee39570f75d
+      size: 14501754
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4579f7466b3ebd76661dbd67d46a0105
+      size: 10403808
+    - path: scripts/train.py
+      hash: md5
+      md5: 20203b276e3d2ba3591e6e3d5b71ec66
+      size: 5610
+    - path: src/features/feature_engineering.py
+      hash: md5
+      md5: bda456ea25e540a0958aa1e8fc4e6108
+      size: 1550
+    - path: src/models/pipeline.py
+      hash: md5
+      md5: feb6c839eeca53d8e6e24787b70d620d
+      size: 2361
+    params:
+      params.yaml:
+        mlflow:
+          tracking_uri: sqlite:///mlflow.db
+          experiment_name: airlinesense-classification
+          registered_model_name: AirlineSenseClassifier
+        training:
+          cv_folds: 3
+          scoring: f1
+          random_state: 42
+          logistic_max_iter: 1000
+          random_forest_estimators: 120
+          random_forest_max_depth: 16
+          random_forest_min_samples_leaf: 2
+    outs:
+    - path: reports/experiment_results.json
+      hash: md5
+      md5: 2b4e0128244a6cf913a6a30265687ed3
+      size: 879
+  evaluate:
+    cmd: .venv/bin/python scripts/evaluate.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 1c3e5597bde0d02f9988477d259f5c93
+      size: 2600855
+    - path: models/airlinesense_pipeline.joblib
+      hash: md5
+      md5: f6bb8c5077eb94514b206bdd9a68f927
+      size: 12984984
+    - path: scripts/evaluate.py
+      hash: md5
+      md5: f373d46a90fe4755b55874cc157de410
+      size: 3559
+    outs:
+    - path: reports/satisfaction_by_segment.csv
+      hash: md5
+      md5: 1b217ebe5613b0afc8cdcb0253d4d07f
+      size: 244
+    - path: reports/test_metrics.json
+      hash: md5
+      md5: 285f11c46ee69ca7166f21415bc2c8c2
+      size: 186

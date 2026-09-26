@@ -1,0 +1,13 @@
+{
+  "project": "AirlineSense",
+  "model_name": "random_forest_baseline",
+  "model_version": "1.0.0",
+  "feature_set": "baseline",
+  "selection_metric": "cross-validated F1",
+  "cv_f1": 0.9520999688429881,
+  "cv_roc_auc": 0.9933163523100842,
+  "mlflow_run_id": "489a1640fd074af6a6435035ae94887d",
+  "mlflow_model_uri": "models:/m-0f0cd6e868d940bfadea6692ea3e67c1",
+  "registry_status": "registered",
+  "positive_label": "Satisfied"
+}
