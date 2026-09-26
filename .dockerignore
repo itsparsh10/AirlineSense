@@ -1,0 +1,16 @@
+.git
+.github
+.venv
+__pycache__
+.pytest_cache
+.dvc/cache
+mlruns
+mlflow.db
+data/raw
+data/processed
+notebooks
+presentation
+outputs
+*.pptx
+.DS_Store
+
