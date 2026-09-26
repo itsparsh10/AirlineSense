@@ -1,0 +1,7 @@
+project_name: AirlineSense
+model_path: models/airlinesense_pipeline.joblib
+model_info_path: models/model_info.json
+api_url: http://localhost:8000
+positive_label: Satisfied
+negative_label: Neutral or Dissatisfied
+
