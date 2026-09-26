@@ -9,7 +9,10 @@ mlruns/
 mlflow.db
 .dvc/cache/
 .dvc-storage/
-data/processed/*.csv
+data/processed/
 reports/figures/*.png
 outputs/
 presentation/build/
+presentation/rendered*/
+.codex-finalizer/
+.chart-data-*/

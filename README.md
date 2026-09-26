@@ -192,5 +192,4 @@ Create a Docker Hub repository named `airlinesense-mlops`, then add these GitHub
 - The current probability threshold is 0.50 and should be tuned against the cost of missed dissatisfied passengers.
 - Cloud deployment is intentionally left as an optional extension after the mandatory local chain is stable.
 
-See [PROJECT_DECISIONS.md](docs/PROJECT_DECISIONS.md), [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md), and [PRESENTATION.md](docs/PRESENTATION.md).
-
+See [PROJECT_DECISIONS.md](docs/PROJECT_DECISIONS.md), [PRESENTATION_SCRIPT.md](docs/PRESENTATION_SCRIPT.md), [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md), [PRESENTATION.md](docs/PRESENTATION.md), and [SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md).
