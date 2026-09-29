@@ -1,195 +1,227 @@
-# AirlineSense
+# ✈️ AirlineSense
 
-**Predict passenger satisfaction before the complaint.**
+> **Predict passenger satisfaction before the complaint.**
 
-AirlineSense is a small end-to-end ML product that predicts whether a passenger will be satisfied from passenger, journey, and service ratings. A Streamlit interface sends a real HTTP request to FastAPI. FastAPI validates the request and uses the same saved sklearn pipeline that was fitted during training.
+[![Python](https://img.shields.io/badge/Python-3.12-blue.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.118-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.50-FF4B4B.svg?logo=streamlit&logoColor=white)](https://streamlit.io/)
+[![MLflow](https://img.shields.io/badge/MLflow-3.5-0194E2.svg?logo=mlflow&logoColor=white)](https://mlflow.org/)
+[![DVC](https://img.shields.io/badge/DVC-3.63-945DD6.svg?logo=dvc&logoColor=white)](https://dvc.org/)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Test Accuracy](https://img.shields.io/badge/Test_Accuracy-96.0%25-brightgreen.svg)]()
+[![Test F1](https://img.shields.io/badge/Test_F1-95.4%25-success.svg)]()
 
-## Verified result
+AirlineSense is an end-to-end Machine Learning product that forecasts passenger satisfaction from flight details, journey attributes, and service touchpoint ratings. It serves real-time predictions via a FastAPI backend connected to an intuitive, interactive Streamlit UI console.
 
-The selected Random Forest achieved the following results on the untouched 20% test set (25,976 passengers):
+---
 
-| Metric | Result |
-|---|---:|
-| Accuracy | 96.0% |
-| Precision | 96.0% |
-| Recall | 94.7% |
-| F1 | 95.4% |
-| ROC-AUC | 0.994 |
+## 🎨 Product Interface
 
-The model supports prioritization and service recovery. It should not be treated as a causal model or used to deny service.
+Below is the live **AirlineSense** prediction dashboard, allowing operations teams to input journey metrics and instantly analyze passenger experience predictions:
 
-## Product flow
+![AirlineSense Streamlit Dashboard](docs/assets/ui_landing.png)
+
+---
+
+## 🎯 Verified Performance Results
+
+The production **Random Forest** model was evaluated on an untouched 20% test set (25,976 passengers):
+
+| Metric | Test Result | Target Alignment |
+|---|---:|---|
+| **Accuracy** | **96.0%** | Overall correct predictions |
+| **Precision** | **96.0%** | Minimizes false positive satisfaction flags |
+| **Recall** | **94.7%** | High coverage of dissatisfied passengers |
+| **F1 Score** | **95.4%** | Balanced harmonic score |
+| **ROC-AUC** | **0.994** | Outstanding class separability |
+
+> ⚠️ **Usage Note**: The model is designed for passenger experience prioritization and service recovery dispatch. It should not be used for automated service denial.
+
+---
+
+## 🔄 End-to-End MLOps Architecture
 
 ```mermaid
 flowchart LR
-    A[Passenger inputs] --> B[Streamlit UI]
-    B -->|HTTP POST /predict| C[FastAPI]
-    C --> D[Saved sklearn pipeline]
-    D --> E[Prediction and probability]
-    F[Raw CSV] --> G[DVC pipeline]
-    G --> H[MLflow experiments]
+    A[Passenger Inputs] --> B[Streamlit UI Console]
+    B -->|HTTP POST /predict| C[FastAPI Backend]
+    C --> D[Saved Scikit-Learn Pipeline]
+    D --> E[Satisfaction Forecast & Probability]
+    F[Raw CSV Data] --> G[DVC Pipeline Stages]
+    G --> H[MLflow Experiment Registry]
     H --> D
-    D --> I[Docker image]
-    I --> J[GitHub Actions]
-    J --> K[Docker Hub]
+    D --> I[Production Docker Container]
+    I --> J[GitHub Actions CI/CD]
+    J --> K[Docker Hub Registry]
 ```
 
-## Dataset status
+---
 
-The supplied Maven Analytics Airline Passenger Satisfaction dataset contains 129,880 rows and 24 columns.
+## 📊 Dataset & Feature Engineering
 
-- Target: `Satisfaction`
-- Class split: 73,452 Neutral or Dissatisfied, 56,428 Satisfied
-- Missing values: 393 values in `Arrival Delay`
-- Duplicates: none
-- Leakage control: unique `ID` excluded; transformations fit only on training folds
-- Status: **READY WITH FIXABLE ISSUES**
+Based on the **Maven Analytics Airline Passenger Satisfaction** dataset:
+- **Total Records**: 129,880 rows, 24 attributes
+- **Target Distribution**: 73,452 Neutral/Dissatisfied (56.5%) vs 56,428 Satisfied (43.5%)
+- **Data Quality**: 393 missing values in `Arrival Delay` median-imputed inside the fitted Scikit-Learn pipeline
+- **Leakage Prevention**: Unique `ID` excluded; all encoders and imputers fit strictly on training folds
 
-Arrival delay is median-imputed inside the fitted pipeline. The raw data is tracked by DVC and excluded from Git.
+### Model Experiment Benchmarks
 
-## Model experiments
-
-| Experiment | Feature set | CV F1 | CV ROC-AUC | Decision |
+| Experiment | Feature Set | CV F1 | CV ROC-AUC | Outcome / Decision |
 |---|---|---:|---:|---|
-| Logistic Regression | Baseline | 0.850 | 0.926 | Useful interpretable baseline |
-| Random Forest | Baseline | **0.952** | **0.993** | Selected |
-| Random Forest | Engineered | 0.951 | 0.993 | Extra features did not improve F1 |
+| Logistic Regression | Baseline | 0.850 | 0.926 | Interpretable linear baseline |
+| **Random Forest** | **Baseline** | **0.952** | **0.993** | **Selected Production Model** |
+| Random Forest | Engineered | 0.951 | 0.993 | Extra features added no evidence |
 
-The engineered model added total delay, average service score, digital experience score, delay per 1,000 miles, and a delay flag. The baseline Random Forest performed slightly better, so the production model keeps the simpler feature set. This avoids carrying transformations that add complexity without evidence of benefit.
+---
 
-## Repository structure
+## 📁 Repository Structure
 
 ```text
-app/api/                 FastAPI service and request schemas
-app/streamlit/           Product interface
-src/data/                Loading and schema validation
-src/features/            Reusable feature transformer
-src/models/              sklearn pipeline builders
-scripts/                 DVC stages and service launcher
-tests/                   Feature, model, and API tests
-models/                  Production pipeline and metadata
-reports/                 Real experiment and test results
-docs/                    Decisions, demo, and presentation notes
-.github/workflows/       CI and Docker Hub publishing
+├── app/
+│   ├── api/             # FastAPI backend service & request schemas
+│   └── streamlit/       # Streamlit interactive UI application
+├── src/
+│   ├── data/            # Data loading, validation, and schema definitions
+│   ├── features/        # Feature transformers and pipelines
+│   └── models/          # Scikit-Learn pipeline builders and evaluators
+├── scripts/             # DVC pipeline stages and service runners
+├── tests/               # Unit and integration test suite (pytest)
+├── models/              # Saved model pipelines and metadata
+├── reports/             # Generated metrics, confusion matrices, and figures
+├── docs/                # Architecture decisions, pitch deck, and scripts
+└── .github/workflows/   # CI/CD workflows for testing and Docker Hub deployment
 ```
 
-## Local setup
+---
 
-Python 3.12 is recommended.
+## 🚀 Quickstart & Local Setup
 
+### Prerequisites
+- Python **3.12+**
+- Git & Make (optional)
+
+### 1. Environment Setup
 ```bash
+# Clone the repository
+git clone https://github.com/itsparsh10/AirlineSense.git
+cd AirlineSense
+
+# Create virtual environment
 python3.12 -m venv .venv
-source .venv/bin/activate
-python -m pip install -r requirements.txt
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-## Reproduce data and training
+### 2. Run the Application Services
 
-The included DVC remote is local and intended for classroom demonstration. On the original development machine:
-
+Using Makefile commands:
 ```bash
-export DVC_SITE_CACHE_DIR=/tmp/airlinesense-dvc-site-cache
-dvc pull
-dvc repro
-dvc metrics show
-dvc plots show
+# Start FastAPI backend (Port 8000)
+make api
+
+# Start Streamlit frontend UI (Port 8501)
+make ui
 ```
 
-Without DVC, the individual commands are:
-
+Or start manually in separate terminal windows:
 ```bash
-python scripts/prepare_data.py
-python scripts/build_features.py
-python scripts/train.py
-python scripts/evaluate.py
+# Terminal 1: API Backend
+python -m uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --reload
+
+# Terminal 2: Web UI
+AIRLINESENSE_API_URL=http://localhost:8000 streamlit run app/streamlit/app.py --server.port 8501
 ```
 
-## MLflow
+Access points:
+- **Streamlit Web UI**: [http://localhost:8501](http://localhost:8501)
+- **FastAPI OpenAPI Specs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **API Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
 
-Training creates four real runs: three cross-validated candidates and one registered production candidate. The registered model is `AirlineSenseClassifier`, version 1 in the local SQLite registry.
+---
+
+## 📡 API Usage Example
+
+Send a prediction payload directly to the FastAPI REST endpoint:
 
 ```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "gender": "Female",
+    "age": 35,
+    "customer_type": "Returning",
+    "type_of_travel": "Business",
+    "travel_class": "Business",
+    "flight_distance": 821,
+    "departure_delay": 26,
+    "arrival_delay": 39,
+    "departure_arrival_convenience": 2,
+    "ease_of_online_booking": 2,
+    "checkin_service": 3,
+    "online_boarding": 5,
+    "gate_location": 2,
+    "onboard_service": 5,
+    "seat_comfort": 4,
+    "leg_room_service": 5,
+    "cleanliness": 5,
+    "food_and_drink": 3,
+    "inflight_service": 5,
+    "inflight_wifi_service": 2,
+    "inflight_entertainment": 5,
+    "baggage_handling": 5
+  }'
+```
+
+---
+
+## 🧪 Testing & Verification
+
+Run the automated test suite covering API contracts, data validation, and model inference:
+
+```bash
+pytest -q
+```
+*Expected Output*: `9 passed`
+
+---
+
+## 🐳 Docker Deployment
+
+Build and launch the complete production environment using Docker Compose:
+
+```bash
+# Copy sample environment configuration
+cp .env.example .env
+
+# Build and start services
+docker compose up --build -d
+
+# Verify container status
+docker compose ps
+curl http://127.0.0.1:8000/health
+```
+
+---
+
+## 🛠️ Experiment Tracking with MLflow & DVC
+
+To inspect experiment runs and model metadata:
+
+```bash
+# Launch MLflow tracking server
 mlflow server \
   --backend-store-uri sqlite:///mlflow.db \
   --default-artifact-root ./mlruns \
   --host 127.0.0.1 \
   --port 5000
 ```
+Open [http://localhost:5000](http://localhost:5000) to view metrics, parameters, and model artifacts.
 
-Open `http://localhost:5000` and compare F1, ROC-AUC, recall, and run parameters.
+---
 
-## Run the product
+## 📄 License & Attribution
 
-Terminal 1:
-
-```bash
-uvicorn app.api.main:app --host 0.0.0.0 --port 8000
-```
-
-Terminal 2:
-
-```bash
-AIRLINESENSE_API_URL=http://localhost:8000 \
-streamlit run app/streamlit/app.py --server.port 8501
-```
-
-- Streamlit: `http://localhost:8501`
-- API docs: `http://localhost:8000/docs`
-- Health check: `http://localhost:8000/health`
-
-## API example
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{
-    "gender":"Female", "age":35, "customer_type":"Returning",
-    "type_of_travel":"Business", "travel_class":"Business",
-    "flight_distance":821, "departure_delay":26, "arrival_delay":39,
-    "departure_arrival_convenience":2, "ease_of_online_booking":2,
-    "checkin_service":3, "online_boarding":5, "gate_location":2,
-    "onboard_service":5, "seat_comfort":4, "leg_room_service":5,
-    "cleanliness":5, "food_and_drink":3, "inflight_service":5,
-    "inflight_wifi_service":2, "inflight_entertainment":5,
-    "baggage_handling":5
-  }'
-```
-
-## Tests
-
-```bash
-pytest -q
-```
-
-Verified locally: **9 passed**.
-
-## Docker
-
-```bash
-docker build -t airlinesense-mlops:local .
-docker run --rm -p 8000:8000 -p 8501:8501 airlinesense-mlops:local
-```
-
-The image starts FastAPI and Streamlit, exposes ports 8000 and 8501, and includes an API health check. The local image was built and the container returned a real model prediction.
-
-## GitHub Actions and Docker Hub
-
-`ci.yml` runs the test suite on pushes and pull requests. `docker-publish.yml` builds on GitHub-hosted infrastructure and publishes these tags:
-
-- `latest` from the default branch
-- `sha-<commit>` for traceability
-- Git tags such as `v1.0.0`
-
-Create a Docker Hub repository named `airlinesense-mlops`, then add these GitHub repository secrets:
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN` (a Docker Hub access token, never the account password)
-
-## Limitations
-
-- The dataset contains post-flight survey ratings, so the prediction is most useful before a complaint or service-recovery decision, not before the flight begins.
-- Satisfaction patterns may drift by airline, route, season, and survey design.
-- The current probability threshold is 0.50 and should be tuned against the cost of missed dissatisfied passengers.
-- Cloud deployment is intentionally left as an optional extension after the mandatory local chain is stable.
-
-See [PROJECT_DECISIONS.md](docs/PROJECT_DECISIONS.md), [PRESENTATION_SCRIPT.md](docs/PRESENTATION_SCRIPT.md), [DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md), [PRESENTATION.md](docs/PRESENTATION.md), and [SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md).
+Developed as an open-source Machine Learning & MLOps project for passenger satisfaction intelligence.

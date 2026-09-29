@@ -1,6 +1,6 @@
 PYTHON ?= .venv/bin/python
 
-.PHONY: setup prepare features train evaluate pipeline test api ui mlflow docker
+.PHONY: setup prepare features train evaluate pipeline test api ui mlflow docker up down
 
 setup:
 	python3.12 -m venv .venv
@@ -34,5 +34,10 @@ mlflow:
 	$(PYTHON) -m mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns --host 127.0.0.1 --port 5000
 
 docker:
-	docker build -t airlinesense-mlops:local .
+	docker build -t airlinesense-mlops:production .
 
+up:
+	docker compose up --build -d
+
+down:
+	docker compose down

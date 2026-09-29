@@ -8,9 +8,11 @@ Target length: 5–7 minutes. Speak naturally. Do not read every label on the sl
 
 The purpose is simple: identify dissatisfaction risk before it becomes a complaint, so a service team can respond sooner. I built it as a working product, with a Streamlit interface, a FastAPI backend, a trained model, experiment tracking, data versioning, tests, and Docker.”
 
-## Slide 2 — The problem (40 seconds)
+## Slide 2 — Business problem and data (40 seconds)
 
-“The dataset contains 129,880 passenger records. Each row combines the passenger profile, flight information, delays, and ratings across the airport and on-board experience.
+“The business problem is that airlines usually learn about dissatisfaction after a complaint. AirlineSense provides an earlier signal, so a service team can identify passengers who may need attention.
+
+The dataset contains 129,880 passenger records. Each row combines the passenger profile, flight information, delays, and ratings across the airport and on-board experience.
 
 Only 43.5 percent of passengers are satisfied. Satisfaction also changes sharply by cabin class and travel purpose. That means one overall average does not tell an operations team which individual passenger may need attention. This is the decision my model supports.”
 
@@ -22,7 +24,17 @@ The dataset has no duplicate rows. Arrival Delay has 393 missing values, which I
 
 I used a stratified 80/20 split. Imputation and one-hot encoding are fitted only on training data and inside each cross-validation fold. The final 25,976 test rows remained untouched until model selection was complete.”
 
-## Slide 4 — Experiments (55 seconds)
+## Slide 4 — Feature engineering used (50 seconds)
+
+“All learned transformations stay inside the sklearn pipeline, so the training and API paths cannot drift apart.
+
+I used median imputation for the 393 missing Arrival Delay values because delays are right-skewed and the median is resistant to extreme delays. I used mode imputation as a safe categorical fallback, and one-hot encoding for the four low-cardinality nominal fields. Unknown categories are ignored so a new value cannot crash the API.
+
+Scaling was conditional: Logistic Regression used StandardScaler, while the selected Random Forest stayed unscaled because tree splits depend on ordering, not distance.
+
+I also evaluated five domain features. Their cross-validated F1 was 0.951, compared with 0.952 for the baseline. I kept the simpler model because extra feature complexity did not improve the evidence.”
+
+## Slide 5 — Experiments (45 seconds)
 
 “I compared three real experiments in MLflow.
 
@@ -30,19 +42,19 @@ Logistic Regression gave an interpretable baseline with an F1 of about 0.85. The
 
 The engineered version scored slightly lower at 0.951. I therefore selected the simpler baseline Random Forest. I kept the feature experiment in the project because it demonstrates an important point: a feature should improve evidence, not just increase complexity.”
 
-## Slide 5 — Final performance (45 seconds)
+## Slide 6 — Final performance (40 seconds)
 
 “On the untouched test set, the selected model achieved 96.0 percent accuracy, 95.4 percent F1, 94.7 percent recall, and 0.994 ROC-AUC.
 
 I focused on F1 because both false alarms and missed satisfied or dissatisfied passengers matter. The default probability threshold is 0.50. In a real airline, I would tune that threshold using the cost of missing a dissatisfied passenger and the available service-recovery capacity.”
 
-## Slide 6 — MLOps architecture (55 seconds)
+## Slide 7 — MLOps used in the project (50 seconds)
 
 “The user works in Streamlit, but Streamlit never loads the model. It sends an HTTP request to FastAPI. FastAPI validates the request, calls the saved sklearn pipeline, and returns the label, probability, model name, version, and a short interpretation.
 
 DVC tracks the raw dataset and the prepare, feature, train, and evaluate stages. MLflow stores the model runs, parameters, metrics, artifacts, and the registered AirlineSenseClassifier. Docker packages the API and UI. GitHub Actions contains one workflow for tests and one for building and publishing the Docker image.”
 
-## Slide 7 — Live demo (about 90 seconds)
+## Slide 8 — Live demo (about 75 seconds)
 
 “Now I will show the product running.”
 
@@ -56,11 +68,11 @@ DVC tracks the raw dataset and the prepare, feature, train, and evaluate stages.
 
 If time allows, open `http://localhost:8000/docs` and show the three endpoints: `/health`, `/model-info`, and `/predict`.
 
-## Slide 8 — Close (35 seconds)
+## Slide 9 — End-to-end product (30 seconds)
 
-“The completed local evidence chain runs from a DVC-versioned dataset, through MLflow experiments and a registered model, into a tested API, a browser interface, and a healthy Docker container.
+“The complete path starts with DVC-versioned passenger data. The sklearn pipeline prepares features and trains the selected Random Forest. MLflow records the experiments. FastAPI serves the saved pipeline, Streamlit provides the product interface, and Docker packages the system.
 
-All nine automated tests pass, and the final model has a 95.4 percent test F1. The repository also contains the GitHub Actions workflow required to publish the image to Docker Hub. Cloud hosting is optional and would be the next deployment step.
+The final model achieves a 95.4 percent test F1, and the browser product answers the original business question by identifying satisfaction risk before a complaint.
 
 Thank you. I am ready for questions.”
 
@@ -126,10 +138,9 @@ Expected result: `9 passed`.
 
 If a live tab fails, do not debug in front of the class. Continue with:
 
-- Slide 7 in the deck
+- Slide 8 in the deck
 - `presentation/ui-demo.png`
 - `reports/figures/confusion_matrix.png`
 - `reports/experiment_results.json`
 
 Say: “I verified this flow locally in Chromium and captured the result as backup evidence.”
-
