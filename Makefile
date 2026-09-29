@@ -22,7 +22,7 @@ evaluate:
 pipeline: prepare features train evaluate
 
 test:
-	$(PYTHON) -m pytest -q
+	PYTHONPATH=. $(PYTHON) -m pytest -q
 
 api:
 	$(PYTHON) -m uvicorn app.api.main:app --host 0.0.0.0 --port 8000 --reload
