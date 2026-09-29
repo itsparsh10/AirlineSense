@@ -14,7 +14,7 @@ trap cleanup EXIT INT TERM
 
 "$PYTHON_BIN" -m streamlit run app/streamlit/app.py \
   --server.address 0.0.0.0 \
-  --server.port 8501 \
+  --server.port "${PORT:-8501}" \
   --server.headless true &
 UI_PID=$!
 
